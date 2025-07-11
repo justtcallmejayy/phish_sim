@@ -5,10 +5,12 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 
 // —————— 1) Configure Google Sheets via service account JSON ——————
+const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
 const auth = new google.auth.GoogleAuth({
-  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  credentials,
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
+
 const sheets = google.sheets({ version: "v4", auth });
 
 // —————— 2) Configure Nodemailer SMTP using Gmail ——————
