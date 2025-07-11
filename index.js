@@ -53,8 +53,9 @@ app.post("/send", async (req, res) => {
     return res.status(400).json({ success: false, error: "Missing recipient" });
   }
 
-  const clickLink =
-    "http://localhost:3000/track?rcpt=" + encodeURIComponent(recipient);
+  const clickLink = `${process.env.BASE_URL}/track?rcpt=${encodeURIComponent(
+    recipient
+  )}`;
 
   const mailOptions = {
     from: process.env.SMTP_USER,
