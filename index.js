@@ -4,14 +4,14 @@ const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 
-// 1) Configure GoogleAuth using the file path
+// 1) Google Sheets auth via keyFile path
 const auth = new google.auth.GoogleAuth({
-  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // e.g. "/etc/secrets/sa-key.json"
+  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 const sheets = google.sheets({ version: "v4", auth });
 
-// 2) Set up Nodemailer
+// 2) Nodemailer setup
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
@@ -43,7 +43,7 @@ app.post("/send", async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("✉️ Mail error:", err);
     res.status(500).json({ success: false, error: err.toString() });
   }
 });
@@ -51,6 +51,7 @@ app.post("/send", async (req, res) => {
 app.get("/track", async (req, res) => {
   const rcpt = req.query.rcpt;
   const timestamp = new Date().toISOString();
+
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.SHEET_ID,
@@ -61,11 +62,10 @@ app.get("/track", async (req, res) => {
   } catch (err) {
     console.error("🔴 Sheets append failed:", err.message);
   }
+
   res.send("<h1>Thanks—your click is recorded!</h1>");
 });
 
-// 3) Use Render's port
+// 3) Listen on Render’s assigned port or 3000 locally
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`✅ Server listening at http://localhost:${PORT}`)
-);
+app.listen(PORT, () => console.log(`✅ Server listening on port ${PORT}`));
